@@ -7,15 +7,16 @@ import config
 
 
 def can_use():
-    """Komenda dla użytkownika o ID COMMAND_ROLE_ID albo osoby z rangą o tym ID."""
+    """Komenda tylko dla administratorów (uprawnienie Administrator albo ranga z ADMIN_ROLE_IDS)."""
 
     async def predicate(interaction: discord.Interaction) -> bool:
         user = interaction.user
-        if user.id == config.COMMAND_ROLE_ID:
-            return True
-        if isinstance(user, discord.Member) and any(r.id == config.COMMAND_ROLE_ID for r in user.roles):
-            return True
-        raise app_commands.CheckFailure("🚫 Nie masz uprawnień do tej komendy.")
+        if isinstance(user, discord.Member):
+            if user.guild_permissions.administrator:
+                return True
+            if any(r.id in config.ADMIN_ROLE_IDS for r in user.roles):
+                return True
+        raise app_commands.CheckFailure("🚫 Ta komenda jest dostępna tylko dla administratorów.")
 
     return app_commands.check(predicate)
 

@@ -30,8 +30,11 @@ PODIUM_URL = os.getenv(
 # Ranga pingowana w ogłoszeniu. Członkowie tej rangi dostają też PV z przyciskami.
 PING_ROLE_ID = _int("PING_ROLE_ID", 1523301940853870653)
 
-# Kto może użyć /posiedzenie: użytkownik o takim ID albo osoba z rangą o takim ID
-COMMAND_ROLE_ID = _int("COMMAND_ROLE_ID", 1523301940853870653)
+# Kto może użyć /posiedzenie: każdy z uprawnieniem Administrator
+# + opcjonalnie dodatkowe rangi (ID po przecinku), np. ADMIN_ROLE_IDS=123,456
+ADMIN_ROLE_IDS = [
+    int(x) for x in os.getenv("ADMIN_ROLE_IDS", "").replace(" ", "").split(",") if x.isdigit()
+]
 
 # Kanał ogłoszeń i kanał logów
 ANNOUNCE_CHANNEL_ID = _int("ANNOUNCE_CHANNEL_ID", 1523311020117065888)
