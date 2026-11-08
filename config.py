@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 from zoneinfo import ZoneInfo
 
 from dotenv import load_dotenv
@@ -12,6 +13,10 @@ def _int(name: str, default=None):
 
 
 TZ = ZoneInfo("Europe/Warsaw")
+
+# Logo partii (dołączane do ogłoszenia jako miniatura)
+LOGO_PATH = Path(__file__).parent / "assets" / "logo.png"
+LOGO_FILENAME = "logo.png"
 
 TOKEN = os.getenv("DISCORD_TOKEN")
 GUILD_ID = _int("GUILD_ID")

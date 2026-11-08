@@ -50,6 +50,8 @@ def build_embed(s: dict) -> discord.Embed:
         color=0x9B59B6,
     )
     embed.set_author(name=config.PARTY_NAME)
+    if config.LOGO_PATH.exists():
+        embed.set_thumbnail(url=f"attachment://{config.LOGO_FILENAME}")
     embed.add_field(name="Termin", value=f"<t:{ts}:F> (<t:{ts}:R>)", inline=False)
     embed.add_field(name="📅 Wydarzenie", value=s["event_url"], inline=False)
     embed.add_field(name="📍 Podium (gdzie mówimy)", value=config.PODIUM_URL, inline=False)
@@ -223,9 +225,15 @@ class Posiedzenie(commands.Cog):
         }
 
         try:
+            logo = (
+                discord.File(config.LOGO_PATH, filename=config.LOGO_FILENAME)
+                if config.LOGO_PATH.exists()
+                else discord.utils.MISSING
+            )
             msg = await channel.send(
                 content=role.mention,
                 embed=build_embed(s),
+                file=logo,
                 view=rsvp_view(sid),
                 allowed_mentions=discord.AllowedMentions(roles=True),
             )
