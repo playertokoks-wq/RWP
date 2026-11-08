@@ -65,7 +65,7 @@ def build_embed(s: dict) -> discord.Embed:
         )
     embed.set_footer(
         text="Odpowiedź można wybrać tylko raz. "
-        "Przypomnienie na PV przyjdzie 30 minut przed startem."
+        "PV z przypomnieniem (30 min przed startem) dostaną osoby, które wybrały inaczej niż „Nie będę”."
     )
     return embed
 
@@ -337,12 +337,9 @@ class Posiedzenie(commands.Cog):
         failed_ids = []
         for m in self._members(s):
             status = s["rsvp"].get(str(m.id))
-            if status == "no":
-                continue
-            kwargs = {"content": dm_content(s, m, reminder=True, status=status)}
-            if status is None:
-                kwargs["view"] = rsvp_view(s["id"])  # niezdecydowani dostają przyciski
-            if await utils.try_dm(m, **kwargs):
+            if status is None or status == "no":
+                continue  # bez odpowiedzi albo "Nie będę" -> brak PV
+            if await utils.try_dm(m, content=dm_content(s, m, reminder=True, status=status)):
                 sent += 1
             else:
                 failed += 1
