@@ -162,6 +162,7 @@ class Posiedzenie(commands.Cog):
         opis="Opcjonalny opis (np. OBOWIĄZKOWE)",
     )
     @app_commands.guild_only()
+    @app_commands.default_permissions(administrator=True)
     @utils.can_use()
     async def posiedzenie(
         self,
