@@ -17,8 +17,8 @@ log = logging.getLogger("rwp-bot.posiedzenie")
 store = Store("sessions")
 lock = asyncio.Lock()
 
-# Przypomnienia: godzinę i 15 minut przed startem
-REMINDER_OFFSETS = (3600, 900)
+# Przypomnienie: 30 minut przed startem
+REMINDER_OFFSETS = (1800,)
 
 STATUS_ORDER = ("yes", "maybe", "late", "no")
 STATUS_LABELS = {
@@ -64,8 +64,8 @@ def build_embed(s: dict) -> discord.Embed:
             inline=True,
         )
     embed.set_footer(
-        text="Odpowiedź można wybrać tylko raz (na kanale lub w PV). "
-        "Przypomnienia przyjdą godzinę i 15 minut przed startem."
+        text="Odpowiedź można wybrać tylko raz. "
+        "Przypomnienie na PV przyjdzie 30 minut przed startem."
     )
     return embed
 
@@ -247,36 +247,11 @@ class Posiedzenie(commands.Cog):
             store.data[sid] = s
             store.save()
 
-        members = self._members(s)
-        await interaction.followup.send(
-            f"✅ Ogłoszenie opublikowane: {msg.jump_url}\nWysyłam PV do {len(members)} osób…", ephemeral=True
-        )
+        await interaction.followup.send(f"✅ Ogłoszenie opublikowane: {msg.jump_url}", ephemeral=True)
         await self.log_msg(
             f"📣 <@{interaction.user.id}> utworzył posiedzenie **{temat}** "
             f"(termin <t:{int(s['start_ts'])}:F>)\n{msg.jump_url}"
         )
-
-        task = asyncio.create_task(self.send_initial_dms(s, members))
-        self._tasks.add(task)
-        task.add_done_callback(self._tasks.discard)
-
-    async def send_initial_dms(self, s: dict, members: list[discord.Member]):
-        sent, failed = 0, []
-        for m in members:
-            ok = await utils.try_dm(
-                m,
-                content=dm_content(s, m, reminder=False, status=None),
-                view=rsvp_view(s["id"]),
-            )
-            if ok:
-                sent += 1
-            else:
-                failed.append(m.id)
-            await asyncio.sleep(0.5)
-        text = f"📨 PV o posiedzeniu **{s['title']}**: wysłano {sent}, nieudane {len(failed)}"
-        if failed:
-            text += f"\nNie dostali (zablokowane PV): {utils.mentions(failed, 1200)}"
-        await self.log_msg(text)
 
     # ----- odpowiedzi -----
     async def handle_rsvp(self, interaction: discord.Interaction, sid: str, status: str):
@@ -373,7 +348,7 @@ class Posiedzenie(commands.Cog):
                 failed += 1
                 failed_ids.append(m.id)
             await asyncio.sleep(0.5)
-        label = "1 godz." if offset == 3600 else "15 min"
+        label = f"{offset // 60} min"
         text = f"⏰ Przypomnienie ({label}) – **{s['title']}**: wysłano {sent}, nieudane {failed}"
         if failed_ids:
             text += f"\nNie dostali: {utils.mentions(failed_ids, 1200)}"

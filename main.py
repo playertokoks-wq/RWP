@@ -9,7 +9,7 @@ import config
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
 log = logging.getLogger("rwp-bot")
 
-EXTENSIONS = ["cogs.posiedzenie"]
+EXTENSIONS = ["cogs.posiedzenie", "cogs.dyscyplina"]
 
 
 class RwpBot(commands.Bot):
